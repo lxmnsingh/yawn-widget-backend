@@ -24,7 +24,7 @@ const limiter = rateLimit({
 // Apply the rate limiter to all requests
 app.use(limiter);
 app.use(helmet());
-app.use(bodyParser.json({limit: '1mb'}));
+app.use(bodyParser.json({ limit: '1mb' }));
 app.use(express.json()); // parse incoming json requests
 cors(app);
 
@@ -34,6 +34,13 @@ app.use('/api', routes);
 
 // webhook route for wert
 app.post('/webhooks/wert', handleWertWebhook);
+app.get('/', (req, res) => {
+    res.send({
+        message: 'Welcome to the YAWN API!',
+        documentation: 'https://documenter.getpostman.com/view/28533772/2sAY4sjja3',
+    });
+});
+
 
 errorHandler(app); // catches and logs all errors
 
