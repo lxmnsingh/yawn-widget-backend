@@ -3,10 +3,7 @@ const app = require('./src/app');
 const mongoose = require('mongoose');
 
 // connect to mongodb Atlas
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then(() => {
+mongoose.connect(process.env.MONGODB_URI).then(() => {
     console.log('Cosnnected to MongoDB');
 
     // start the server
