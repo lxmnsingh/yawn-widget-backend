@@ -1,15 +1,18 @@
+require('dotenv').config(); // load environment variables
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const cors = require('./middlewares/cors');
-const unhandledErrors = require('./middlewares/unhandledErrors');
+const errorHandler = require('./middlewares/errorHandler');
+const requestLogger = require('./middlewares/requestLogger');
 const routes = require('./routes');
 const handleWertWebhook = require('./webhooks/wertWebhooks');
-require('dotenv').config(); // load environment variables
 
 // create the express app
 const app = express();
+
+app.use(requestLogger); // logs all incoming requests
 
 // Define the rate limit rule
 const limiter = rateLimit({
@@ -32,6 +35,6 @@ app.use('/api', routes);
 // webhook route for wert
 app.post('/webhooks/wert', handleWertWebhook);
 
-unhandledErrors(app);
+errorHandler(app); // catches and logs all errors
 
 module.exports = app;
