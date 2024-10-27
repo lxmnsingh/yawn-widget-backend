@@ -34,17 +34,22 @@ const handleWertWebhooks = async (req, res, next) => {
             "order_canceled": "canceled"
         }[type] || "pending";  // Default to "pending" for unrecognized types
 
+
         // Prepare order data and save
         const orderData = {
             order_id: order.id,
             status,
             tx_id: order.transaction_id
         };
-        const savedOrder = await orderService.saveOrder(orderData, userId);
-        if(savedOrder) await pusher.trigger('wert-webhook', "order-status", savedOrder.wert_order);
 
+        let newOrder = await orderService.getOrderById(order.id);
+        if(newOrder?.wert_order?.status != "success"){
+            newOrder = await orderService.saveOrder(orderData, userId);
+        }
+
+        if(newOrder) await pusher.trigger('wert-webhook', "order-status", newOrder.wert_order);
         // Respond with success
-        res.status(200).json({ message: 'Order-related webhook received', event, order: savedOrder });
+        res.status(200).json({ message: 'Order-related webhook received', event, order: newOrder });
 
     } catch (error) {
         logger.error(`Error processing webhook for event ${event.type} - ${error.message}`);
