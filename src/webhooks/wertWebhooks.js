@@ -52,7 +52,7 @@ const handleWertWebhooks = async (req, res, next) => {
         res.status(200).json({ message: 'Order-related webhook received', event, order: newOrder });
 
     } catch (error) {
-        logger.error(`Error processing webhook for event ${event.type} - ${error.message}`);
+        logger.error(`Error processing webhook for event ${event.type} - ${error.message}`, { stack: error.stack });
         next(isHttpError(error) ? error : new InternalServerError('Something Went Wrong'));
     }
 };
