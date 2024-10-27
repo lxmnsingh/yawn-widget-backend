@@ -10,16 +10,18 @@ const orderService = {
             const order = await wertService.getOrder({ "search_by": orderData.order_id });
             console.log("Full order data:", order);
     
-            if (!order) {
+            /*if (!order) {
                 // Log the missing order and exit without throwing
                 logger.warn(`Order with ID ${orderData.order_id} not found in Wert system.`);
                 return { message: 'Order not found, skipping update.' };
-            }
+            }*/
+
+            const mergedOrder = { ...(order || {}), ...orderData };
             
             const finalOrderData = {
                 order_id: orderData.order_id,
                 userId: userId, // user id from the database
-                wert_order: { ...order, tx_id: orderData.tx_id, status: orderData.status }
+                wert_order: mergedOrder
             };
 
             logger.info(`Successfully saved order ${orderData.order_id} in the database.`);

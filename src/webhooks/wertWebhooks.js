@@ -39,7 +39,11 @@ const handleWertWebhooks = async (req, res, next) => {
         const orderData = {
             order_id: order.id,
             status,
-            tx_id: order.transaction_id
+            tx_id: order.transaction_id,
+            crypto_amount: order.base_amount,
+            currency: order.quote,
+            currency_amount: order.quote_amount,
+            address: order.address,
         };
 
         let newOrder = await orderService.getOrderById(order.id);
