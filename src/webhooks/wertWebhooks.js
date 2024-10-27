@@ -3,6 +3,7 @@ const { InternalServerError, isHttpError } = require('http-errors');
 const clickService = require("../services/clickService");
 const orderService = require('../services/orderService');
 const logger = require('../utils/logger');
+const pusher = require('../services/pusherService');
 
 const handleWertWebhooks = async (req, res, next) => {
     const event = req.body;
@@ -40,6 +41,7 @@ const handleWertWebhooks = async (req, res, next) => {
             tx_id: order.transaction_id
         };
         const savedOrder = await orderService.saveOrder(orderData, userId);
+        if(savedOrder) await pusher.trigger('wert-webhook', "order-status", savedOrder.wert_order);
 
         // Respond with success
         res.status(200).json({ message: 'Order-related webhook received', event, order: savedOrder });

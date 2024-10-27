@@ -31,7 +31,13 @@ const ctrl = {
             if(isHttpError(error)) next(error);
             else next(new InternalServerError('Something Went Wrong'));
         }
-    }
+    },
+
+    getOrderById: async (req, res, next) => {
+        const {order_id} = req.params;
+        const order = await orderService.getOrderById(order_id);
+        res.status(200).json({order});
+    },
 };
 
 module.exports = ctrl;

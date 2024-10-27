@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.post('/', validateOrderCreation, auth,  ctrl.saveOrder);
 router.get('/users', auth, ctrl.getUserOrders);
+router.get('/:order_id', auth, ctrl.getOrderById);
 //router.get('/order/:order_id', auth, getOrder);
 
 module.exports = router;

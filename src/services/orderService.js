@@ -33,6 +33,10 @@ const orderService = {
 
     getUserOrders: async (userId) => {
         return await orderRepository.getOrdersByUser(userId);
+    },
+
+    getOrderById: async (order_id) => {
+        return await orderRepository.getOrderById(order_id);
     }
 };
 
