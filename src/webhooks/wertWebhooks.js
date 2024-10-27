@@ -13,7 +13,12 @@ const handleWertWebhooks = async (req, res, next) => {
     }
 
     try {
-        const { userId } = await clickService.getClick(click_id);
+        const click = await clickService.getClick(click_id);
+        if (!click) {
+            return res.status(404).json({ message: `Click ID ${click_id} not found`, event });
+        }
+
+        const { userId } = click;
 
         // Set order status based on event type
         const status = {
