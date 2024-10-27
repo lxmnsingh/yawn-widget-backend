@@ -12,21 +12,32 @@ const klaviyoAPI = axios.create({
 });
 
 // Method to check if a profile exists
-const profileExists = async (email) => {
+const getProfileByEmail = async (email) => {
     try {
         const response = await klaviyoAPI.get(`/profiles?filter=equals(email,"${email}")`);
-        return response.data?.data?.length; // Returns true if profile exists, false otherwise
+        return response.data?.data; // Returns profile if exists
     } catch (error) {
         console.error('Error checking profile existence:', error);
         return false; // Consider profile not existing on error
     }
 };
 
-// Method to create or update a profile in Klaviyo
-const createOrUpdateProfile = async (profileData) => {
+// Method to create a profile in Klaviyo
+const createProfile = async (profileData) => {
     try {
         const response = await klaviyoAPI.post('/profiles/', { data: { type: 'profile', attributes: profileData } });
         return response.data.data.id; // Return the profile ID
+    } catch (error) {
+        console.error('Error creating or updating profile:', error);
+        return null; // Return null to indicate failure
+    }
+};
+
+// Method to update a profile in Klaviyo
+const updateProfile = async (profileData, profile_id) => {
+    try {
+        const response = await klaviyoAPI.patch(`/profiles/${profile_id}`, { data: { type: 'profile', attributes: profileData } });
+        return response.data.data; // Return the profile ID
     } catch (error) {
         console.error('Error creating or updating profile:', error);
         return null; // Return null to indicate failure
@@ -51,14 +62,17 @@ const subscribeUserToList = async (user) => {
         email: user?.email,
         first_name: firstName,
         last_name: lastName,
-        phone_number: user?.phone
+        phone_number: user?.phone,
+        properties: {
+            "Scenario":"NoPurchase"
+        }
     };
 
     try {
-        const exists = await profileExists(profileData.email);
-        if (!exists) {
+        const profile = await getProfileByEmail(profileData.email);
+        if (profile.length==0) {
             // Step 1: Create or update the profile and get the profile ID
-            const profileId = await createOrUpdateProfile(profileData);
+            const profileId = await createProfile(profileData);
             if (profileId) {
                 // Step 2: Subscribe the profile to the list using the profile ID
                 const subscriptionResult = await subscribeProfileToList(profileId);
@@ -74,6 +88,31 @@ const subscribeUserToList = async (user) => {
     }
 };
 
+// Main function to handle adding scenarios to profiles
+const updateSceneraioToProfile = async (user, scenario) => {
+
+    const profileData = {
+        "properties": {
+          "Scenario": scenario
+        }
+      };
+    try {
+        const profile = await getProfileByEmail(user.email);
+        console.log("Profile is:", profile);
+        if (profile.length) {
+            // Step 1: Create or update the profile and get the profile ID
+            const updatedProfile = await updateProfile(profileData, profile.id);
+            console.log("Updated profile:", updatedProfile);
+            return updatedProfile;
+        } else {
+            console.log("Profile not found, skipping update.");
+        }
+    } catch (error) {
+        console.error('Error in updating profile:', error);
+    }
+};
+
 module.exports = {
-    subscribeUserToList
+    subscribeUserToList,
+    updateSceneraioToProfile
 };

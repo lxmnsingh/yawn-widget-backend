@@ -5,33 +5,38 @@ const orderService = require('../services/orderService');
 
 const handleWertWebhooks = async (req, res, next) => {
     const event = req.body;
-    let status = "pending";
+    const { type, click_id, order } = event;
+
+    // Only handle events that have order data
+    if (!order) {
+        return res.status(200).json({ message: 'Non-order event received', event });
+    }
 
     try {
-        if(event.type==="order_complete"){
-            status = "success";
-        }else if(event.type==="order_failed"){
-            status = "failed";
-        }else if(event.type==="order_canceled"){
-            status = "canceled";
-        }else if(event.type==="tx_smart_contract_failed"){
-            status = "failed";
-        }else {
-            status = "pending";
-        }
-        const click_id = event.click_id;
         const { userId } = await clickService.getClick(click_id);
+
+        // Set order status based on event type
+        const status = {
+            "order_complete": "success",
+            "order_failed": "failed",
+            "tx_smart_contract_failed": "failed",
+            "order_canceled": "canceled"
+        }[type] || "pending";  // Default to "pending" for unrecognized types
+
+        // Prepare order data and save
         const orderData = {
-            order_id: event.order?.id,
-            status: status,
-            tx_id: event.order?.transaction_id
+            order_id: order.id,
+            status,
+            tx_id: order.transaction_id
         };
-        const order = await orderService.saveOrder(orderData, userId);
-        res.status(200).json({ message: 'Webhook received', event, order });
+        const savedOrder = await orderService.saveOrder(orderData, userId);
+
+        // Respond with success
+        res.status(200).json({ message: 'Order-related webhook received', event, order: savedOrder });
+
     } catch (error) {
-        console.log(error);
-        if (isHttpError(error)) next(error);
-        else next(new InternalServerError('Something Went Wrong'));
+        console.error(error);
+        next(isHttpError(error) ? error : new InternalServerError('Something Went Wrong'));
     }
 };
 
