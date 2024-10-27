@@ -47,12 +47,13 @@ const handleWertWebhooks = async (req, res, next) => {
             newOrder = await orderService.saveOrder(orderData, userId);
         }
 
-        if(newOrder) await pusher.trigger('wert-webhook', "order-status", newOrder.wert_order);
+        if(newOrder) await pusher.trigger('wert-webhook', "order-status", newOrder?.wert_order);
         // Respond with success
         res.status(200).json({ message: 'Order-related webhook received', event, order: newOrder });
 
     } catch (error) {
-        logger.error(`Error processing webhook for event ${event.type} - ${error.message}`, { stack: error.stack });
+        logger.error(`Error processing webhook for event ${event.type} - ${error.message}`);
+        console.error(error);
         next(isHttpError(error) ? error : new InternalServerError('Something Went Wrong'));
     }
 };

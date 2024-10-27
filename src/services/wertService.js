@@ -30,8 +30,8 @@ const wertDataServices = {
     getOrder: async (search_by) => {
         try {
             const response = await ax.get('/orders', {params: search_by});
-            if(response?.data?.data?.length>0) return response?.data?.data[0];
             console.log("Search by Response is:", response?.data?.data);
+            if(response?.data?.data?.length>0) return response?.data?.data[0];
             return null;
         } catch (error) {
             console.error("Error getting order from Wert by id:", error);

@@ -26,6 +26,7 @@ const orderService = {
             // Update the order in your repository
             return await orderRepository.updateOrder(finalOrderData, orderData.order_id);
         } catch (error) {
+            console.error(error);
             logger.error(`Error fetching order ${orderData.order_id} from the Wert.`);
             throw error;
         }     
