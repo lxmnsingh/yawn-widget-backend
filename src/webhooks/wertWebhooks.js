@@ -47,7 +47,16 @@ const handleWertWebhooks = async (req, res, next) => {
             newOrder = await orderService.saveOrder(orderData, userId);
         }
 
-        if(newOrder) await pusher.trigger('wert-webhook', "order-status", newOrder?.wert_order);
+        // Trigger Pusher event only if order was successfully processed
+        if (newOrder?.wert_order) {
+            try {
+                await pusher.trigger('wert-webhook', 'order-status', newOrder.wert_order);
+                logger.info(`Pusher event sent for order ${order.id}`);
+            } catch (pusherError) {
+                logger.error(`Pusher trigger failed for order ${order.id}: ${pusherError.message}`);
+            }
+        }
+
         // Respond with success
         res.status(200).json({ message: 'Order-related webhook received', event, order: newOrder });
 
