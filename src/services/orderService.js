@@ -2,6 +2,7 @@ const {NotFound} = require('http-errors');
 const wertService = require('./wertService');
 const orderRepository = require('../repositories/orderRepository');
 const logger = require('../utils/logger');
+const web3 = require('../helpers/web3');
 
 const orderService = {
     saveOrder: async (orderData, userId) => {
@@ -16,8 +17,12 @@ const orderService = {
                 return { message: 'Order not found, skipping update.' };
             }*/
 
-            const mergedOrder = { ...(order || {}), ...orderData };
-            
+            let mergedOrder = { ...(order || {}), ...orderData };
+            if(mergedOrder.tx_id) {
+                const onChainData = await web3.getTransactionDetails(mergedOrder.tx_id);
+                console.log("onchain data",onChainData);
+                mergedOrder = {...mergedOrder, ...onChainData};
+            }
             const finalOrderData = {
                 order_id: orderData.order_id,
                 userId: userId, // user id from the database

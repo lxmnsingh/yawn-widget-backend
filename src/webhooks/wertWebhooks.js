@@ -46,10 +46,10 @@ const handleWertWebhooks = async (req, res, next) => {
             address: order.address,
         };
 
-        let newOrder = await orderService.getOrderById(order.id);
-        if(newOrder?.wert_order?.status != "success"){
-            newOrder = await orderService.saveOrder(orderData, userId);
-        }
+        //let newOrder = await orderService.getOrderById(order.id);
+        //if(newOrder?.wert_order?.status != "success"){
+            let newOrder = await orderService.saveOrder(orderData, userId);
+        //}
 
         // Trigger Pusher event only if order was successfully processed
         if (newOrder?.wert_order) {
