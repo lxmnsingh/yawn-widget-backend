@@ -1,6 +1,8 @@
 // src/controllers/IndexController.js
 const { isHttpError, InternalServerError } = require('http-errors');
 const cmcServices = require('../services/cmcService');
+const { getExchangeRate } = require('../services/forexService');
+const { getTokenInformation } = require('../services/lifiService');
 
 const ctrl = {
 
@@ -21,7 +23,29 @@ const ctrl = {
             if (isHttpError(error)) next(error);
             else next(new InternalServerError('Something Went Wrong'));
         }
-    }
+    },
+
+    getForexRates: async (req, res, next) => {
+        try {
+            const rates = await getExchangeRate();
+            res.status(200).json(rates);
+        } catch (error) {
+            if (isHttpError(error)) next(error);
+            else next(new InternalServerError('Something Went Wrong'));
+        }
+    },
+
+    getTokenInfo: async (req, res, next) => {
+        try {
+            const chain = req.query.chain || "ETH";
+            const token = req.query.token || "0x88Ce174C655B6d11210A069B2c106632DaBDB068"
+            const data = await getTokenInformation(chain, token);
+            res.status(200).json(data);
+        } catch (error) {
+            if (isHttpError(error)) next(error);
+            else next(new InternalServerError('Something Went Wrong'));
+        }
+    },
 };
 
 module.exports = ctrl;

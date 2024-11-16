@@ -2,13 +2,13 @@ const Order = require('../models/Order');
 
 const orderRepository = {
     // update an order
-    updateOrder: async (data, order_id) => {
-        return await Order.findOneAndUpdate({ order_id: order_id }, data, { new: true, upsert: true});
+    updateOrder: async (data, click_id) => {
+        return await Order.findOneAndUpdate({ click_id: click_id }, data, { new: true, upsert: true});
     },
 
     // get order by ID
     getOrderById: async (order_id) => {
-        return await Order.findOne({ order_id: order_id });
+        return await Order.findOne({ _id: order_id });
     },
 
     // get all orders for a user

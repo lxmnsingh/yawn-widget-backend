@@ -12,8 +12,6 @@ const handleWertWebhook = require('./webhooks/wertWebhooks');
 // create the express app
 const app = express();
 
-app.use(requestLogger); // logs all incoming requests
-
 // Define the rate limit rule
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -26,6 +24,7 @@ app.use(limiter);
 app.use(helmet());
 app.use(bodyParser.json({ limit: '1mb' }));
 app.use(express.json()); // parse incoming json requests
+app.use(requestLogger); // logs all incoming requests
 cors(app);
 
 // routes setup

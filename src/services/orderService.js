@@ -1,23 +1,18 @@
 const {NotFound} = require('http-errors');
-const wertService = require('./wertService');
+//const wertService = require('./wertService');
 const orderRepository = require('../repositories/orderRepository');
 const logger = require('../utils/logger');
-const web3 = require('../helpers/web3');
+//const web3 = require('../helpers/web3');
 
 const orderService = {
-    saveOrder: async (orderData, userId) => {
+    saveOrder: async (orderData, click_id) => {
         try {
-            // Fetch order from Wert by order ID
+            
+            /* //Fetch order from Wert by order ID
             const order = await wertService.getOrder({ "search_by": orderData.order_id });
             console.log("Full order data:", order);
-    
-            /*if (!order) {
-                // Log the missing order and exit without throwing
-                logger.warn(`Order with ID ${orderData.order_id} not found in Wert system.`);
-                return { message: 'Order not found, skipping update.' };
-            }*/
 
-            let mergedOrder = { ...(order || {}), ...orderData };
+            //let mergedOrder = { ...(order || {}), ...orderData };
             if(mergedOrder.tx_id) {
                 const onChainData = await web3.getTransactionDetails(mergedOrder.tx_id);
                 console.log("onchain data",onChainData);
@@ -27,11 +22,11 @@ const orderService = {
                 order_id: orderData.order_id,
                 userId: userId, // user id from the database
                 wert_order: mergedOrder
-            };
+            };*/
 
-            logger.info(`Successfully saved order ${orderData.order_id} in the database.`);
+            //logger.info(`Successfully saved order ${orderData.order_id} in the database.`);
             // Update the order in your repository
-            return await orderRepository.updateOrder(finalOrderData, orderData.order_id);
+            return await orderRepository.updateOrder(orderData, click_id);
         } catch (error) {
             console.error(error);
             logger.error(`Error fetching order ${orderData.order_id} from the Wert.`);
