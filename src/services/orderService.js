@@ -29,7 +29,7 @@ const orderService = {
             return await orderRepository.updateOrder(orderData, id);
         } catch (error) {
             console.error(error);
-            logger.error(`Error fetching order ${orderData.order_id} from the Wert.`);
+            logger.error(`Error saving order ${id}`);
             throw error;
         }     
     },    
