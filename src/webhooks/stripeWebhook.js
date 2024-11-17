@@ -1,5 +1,5 @@
 // src/webhooks/wertWebhooks.js
-const { InternalServerError, isHttpError } = require('http-errors');
+const { InternalServerError, isHttpError, NotFound, BadRequest } = require('http-errors');
 const orderService = require('../services/orderService');
 const logger = require('../utils/logger');
 const { executeQuote } = require('../services/lifiService');
@@ -31,7 +31,7 @@ const handleStripeWebhook = async (req, res, next) => {
         // Respond with success
         logger.info(`Initiated processing webhook for the orderId ${orderId}`);
         let order = await orderService.saveOrder(orderData, orderId);
-        if (order && !order?.crypto?.txHash) {
+        if (!order?.crypto?.txHash) {
             console.log("Ethereum Transaction Initiated...");
             const tx = await executeQuote(order);
             console.log("Ethereum Transaction Completed:", tx);
@@ -59,8 +59,8 @@ const handleStripeWebhook = async (req, res, next) => {
             }
             res.status(200).json({ message: 'Webhook updated successfully', order: result });
         } else {
-            logger.warn(`No order found for the orderId ${orderId}`);
-            return res.status(404).json({ message: 'No order found' });
+            logger.warn(`orderId ${orderId} already updated`);
+            return res.status(409).json({ message: 'Order is already up-to-date.' });
         }
 
     } catch (error) {
