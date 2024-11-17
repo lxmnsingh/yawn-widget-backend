@@ -1,6 +1,7 @@
 const axios = require('axios');
 const NodeCache = require('node-cache');
 const { ethers } = require("ethers");
+const crypto = require('crypto');
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY; // Replace with your private key
 const INFURA_URL = `https://mainnet.infura.io/v3/${process.env.INFURA_KEY}`; // Replace with your Infura/Alchemy RPC URL
@@ -56,6 +57,10 @@ async function calculateTotalGasCost(gasCosts) {
   }, 0); // Start with an initial total of 0
 }
 
+function generateRandomTransactionHash() {
+  return '0x' + crypto.randomBytes(32).toString('hex');
+}
+
 async function toBigNumberETH(amount) {
   if(!amount) return;
   const scaledAmount = Math.round(amount * 1e18); // Convert to integer
@@ -92,7 +97,7 @@ async function executeQuote(order) {
     const quote = results;
 
     if (quote && quote.transactionRequest) {
-      const txHash = await sendTransaction(quote.transactionRequest);
+      const txHash = generateRandomTransactionHash(); //await sendTransaction(quote.transactionRequest);
 
       let estimatedToAmtount = quote?.estimate?.toAmount;
       estimatedToAmtount = (estimatedToAmtount / 1e18).toFixed(4);

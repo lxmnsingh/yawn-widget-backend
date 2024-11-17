@@ -31,21 +31,21 @@ const handleStripeWebhook = async (req, res, next) => {
         // Respond with success
         logger.info(`Initiated processing webhook for the orderId ${orderId}`);
         let order = await orderService.saveOrder(orderData, orderId);
-        //if (!order?.crypto?.txHash) {
-            //console.log("Ethereum Transaction Initiated...");
-            //const tx = await executeQuote(order);
-            //console.log("Ethereum Transaction Completed:", tx);
+        if (!order?.crypto?.txHash) {
+            console.log("Ethereum Transaction Initiated...");
+            const tx = await executeQuote(order);
+            console.log("Ethereum Transaction Completed:", tx);
 
-            /*orderData = {
+            orderData = {
                 networkFee: tx?.networkFee,
                 'toToken.tokenAmount': tx?.toTokenAmount,
                 'fromToken.tokenAmount': tx?.fromTokenAmount,
                 'crypto.txHash': tx?.txHash,
                 fee: tx?.fee,
                 status: orderStatuses[paymentIntent?.status]
-            };*/
+            };
 
-            //order = await orderService.saveOrder(orderData, orderId);
+            order = await orderService.saveOrder(orderData, orderId);
 
             const result = {
                 _id: orderId,
@@ -58,10 +58,10 @@ const handleStripeWebhook = async (req, res, next) => {
                 updatedAt: order.updatedAt
             }
             res.status(200).json({ message: 'Webhook updated successfully', order: result });
-        /*} else {
+        } else {
             logger.warn(`orderId ${orderId} already updated`);
             return res.status(409).json({ message: 'Order is already up-to-date.' });
-        }*/
+        }
 
     } catch (error) {
         logger.error(`Error processing webhook for the orderId ${orderId} - ${error.message}`);
