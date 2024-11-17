@@ -2,8 +2,14 @@ const Order = require('../models/Order');
 
 const orderRepository = {
     // update an order
-    updateOrder: async (data, click_id) => {
-        return await Order.findOneAndUpdate({ click_id: click_id }, data, { new: true, upsert: true});
+    updateOrder: async (data, id) => {
+        return await Order.findOneAndUpdate(
+            {
+                $or: [{ click_id: id }, { _id: id }]
+            },
+            data,
+            { new: true, upsert: true }
+        );
     },
 
     // get order by ID

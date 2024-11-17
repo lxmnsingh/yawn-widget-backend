@@ -64,8 +64,11 @@ const orderSchema = new mongoose.Schema(
         stripePaymentId: {
             type: String, // Only for Credit Card payments
         },
+        stripePayment: {
+            type: Object,
+        },
         crypto: {
-            transactionHash: { type: String }, // Only for Crypto payments
+            txHash: { type: String }, // Only for Crypto payments
             blockchain: { type: String }, // E.g., Ethereum, BNB Chain
             network: { type: String }, // E.g., sepolia, mainnet
         },

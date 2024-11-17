@@ -7,7 +7,8 @@ const cors = require('./middlewares/cors');
 const errorHandler = require('./middlewares/errorHandler');
 const requestLogger = require('./middlewares/requestLogger');
 const routes = require('./routes');
-const handleWertWebhook = require('./webhooks/wertWebhooks');
+//const handleWertWebhook = require('./webhooks/wertWebhooks');
+const handleStripeWebhook = require('./webhooks/stripeWebhook');
 
 // create the express app
 const app = express();
@@ -15,7 +16,7 @@ const app = express();
 // Define the rate limit rule
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+    max: 1000, // Limit each IP to 100 requests per windowMs
     message: 'Too many requests from this IP, please try again after 15 minutes',
     headers: true, // Send rate limit info in the headers
 });
@@ -32,7 +33,8 @@ cors(app);
 app.use('/api', routes);
 
 // webhook route for wert
-app.post('/webhooks/wert', handleWertWebhook);
+//app.post('/webhooks/wert', handleWertWebhook);
+app.post('/webhooks/stripe/:orderId', handleStripeWebhook);
 app.get('/', (req, res) => {
     res.send({
         message: 'Welcome to the YAWN API!',

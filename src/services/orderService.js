@@ -5,7 +5,7 @@ const logger = require('../utils/logger');
 //const web3 = require('../helpers/web3');
 
 const orderService = {
-    saveOrder: async (orderData, click_id) => {
+    saveOrder: async (orderData, id) => {
         try {
             
             /* //Fetch order from Wert by order ID
@@ -26,7 +26,7 @@ const orderService = {
 
             //logger.info(`Successfully saved order ${orderData.order_id} in the database.`);
             // Update the order in your repository
-            return await orderRepository.updateOrder(orderData, click_id);
+            return await orderRepository.updateOrder(orderData, id);
         } catch (error) {
             console.error(error);
             logger.error(`Error fetching order ${orderData.order_id} from the Wert.`);
