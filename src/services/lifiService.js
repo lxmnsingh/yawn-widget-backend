@@ -97,7 +97,7 @@ async function executeQuote(order) {
     const quote = results;
 
     if (quote && quote.transactionRequest) {
-      const txHash = generateRandomTransactionHash(); //await sendTransaction(quote.transactionRequest);
+      const txHash =  await sendTransaction(quote.transactionRequest); // generateRandomTransactionHash();
 
       let estimatedToAmtount = quote?.estimate?.toAmount;
       estimatedToAmtount = (estimatedToAmtount / 1e18).toFixed(4);
