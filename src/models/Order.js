@@ -82,6 +82,9 @@ const orderSchema = new mongoose.Schema(
         errorReason: {
             type: String, // Reason for failure, if applicable
         },
+        pixelClickId: {
+            type: String,
+        },
     },
     {
         timestamps: true, // Automatically add createdAt and updatedAt fields
