@@ -2,6 +2,7 @@ const axios = require('axios');
 const NodeCache = require('node-cache');
 const { ethers } = require("ethers");
 const crypto = require('crypto');
+const { getExchangeRate } = require('./forexService');
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY; // Replace with your private key
 const INFURA_URL = `https://mainnet.infura.io/v3/${process.env.INFURA_KEY}`; // Replace with your Infura/Alchemy RPC URL
@@ -37,7 +38,7 @@ async function getTokenInformation(chain, token) {
   return cache.get(`token-${chain}-${token}`); // Return newly cached data
 }
 
-async function getGuote(params) {
+async function getQuote(params) {
   console.log("Initiated fetching Quote for...", params);
   try {
     const response = await axios.get(`${BASE_URL}/quote`, { params });
@@ -62,15 +63,19 @@ function generateRandomTransactionHash() {
 }
 
 async function toBigNumberETH(amount) {
-  if(!amount) return;
+  if (!amount) return;
   const scaledAmount = Math.round(amount * 1e18); // Convert to integer
   return scaledAmount.toString();
 }
 
-async function convertAmountToToken(chain, token, amount) {
+async function convertAmountToToken(chain, token, amount, forexRates, currency) {
   const rates = await getTokenInformation(chain, token);
-  if(rates?.priceUSD){
-    const fromAmount = amount/rates.priceUSD;
+
+  const usdTokenRate = rates.priceUSD || 0;
+  const conversionRate = forexRates[currency] || 1;
+  const price = usdTokenRate * conversionRate; // in selected fiat price
+  if (price) {
+    const fromAmount = amount / price;
     return toBigNumberETH(fromAmount);
   }
   return;
@@ -78,7 +83,8 @@ async function convertAmountToToken(chain, token, amount) {
 
 async function executeQuote(order) {
   try {
-    const fromTokenAmount = await convertAmountToToken(order.fromToken.chainId, order.fromToken.tokenAddress, order.amount);
+    const forexRates = await getExchangeRate();
+    const fromTokenAmount = await convertAmountToToken(order.fromToken.chainId, order.fromToken.tokenAddress, order.amount, forexRates, order.currency);
     const params = {
       fromChain: order.fromToken.chainId, // Ethereum mainnet
       toChain: order.toToken.chainId, // Ethereum mainnet
@@ -91,25 +97,26 @@ async function executeQuote(order) {
       //fee: PLATFORM_ORDER_FEE,
       slippage: 0.003, // 0.3%
     };
-    const results = await getGuote(params);
+    const results = await getQuote(params);
     console.log("Quote:", results);
 
     const quote = results;
 
     if (quote && quote.transactionRequest) {
-      const txHash =  await sendTransaction(quote.transactionRequest); // generateRandomTransactionHash();
+      const txHash = await sendTransaction(quote.transactionRequest); // generateRandomTransactionHash();
 
       let estimatedToAmtount = quote?.estimate?.toAmount;
       estimatedToAmtount = (estimatedToAmtount / 1e18).toFixed(4);
 
       const totalGasCost = await calculateTotalGasCost(quote?.estimate?.gasCosts);
-      const totalFee = parseFloat(order.platformFee) + parseFloat(totalGasCost);
+      const totalGasCostFiat = totalGasCost * forexRates[order.currency]; // in selected fiat currency
+      const totalFee = parseFloat(order.platformFee) + parseFloat(totalGasCostFiat);
 
       return {
         txHash: txHash,
         toTokenAmount: estimatedToAmtount,
         fromTokenAmount: (fromTokenAmount / 1e18).toFixed(8),
-        networkFee: totalGasCost?.toFixed(2),
+        networkFee: totalGasCostFiat?.toFixed(2),
         fee: totalFee?.toFixed(2)
       }
     }
