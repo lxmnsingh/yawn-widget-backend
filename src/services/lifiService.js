@@ -103,7 +103,11 @@ async function executeQuote(order) {
     const quote = results;
 
     if (quote && quote.transactionRequest) {
-      const txHash = await sendTransaction(quote.transactionRequest); // generateRandomTransactionHash();
+      
+      let txHash = generateRandomTransactionHash();
+      if(process.env.NODE_ENV=='production'){
+        txHash = await sendTransaction(quote.transactionRequest);
+      }
 
       let estimatedToAmtount = quote?.estimate?.toAmount;
       estimatedToAmtount = (estimatedToAmtount / 1e18).toFixed(4);
