@@ -85,6 +85,13 @@ const orderSchema = new mongoose.Schema(
         pixelClickId: {
             type: String,
         },
+        txReceipt: {
+            type: Boolean,
+            default: false
+        },
+        email: {
+            type: String,
+        },
     },
     {
         timestamps: true, // Automatically add createdAt and updatedAt fields
